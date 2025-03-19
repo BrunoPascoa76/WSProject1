@@ -173,11 +173,6 @@ with open("organizations.csv","r") as csvfile:
             film_uri=URIRef(film_ns[slugify(film)])
             g.add((film_uri,sw.appears_in,film_uri))
 
-
-
-
-
-
         if row["affiliation"] is not None:
             g.add((organization_uri, sw.affiliation, Literal(row["affiliation"])))
 
