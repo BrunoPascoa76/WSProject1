@@ -46,10 +46,10 @@ with open("characters.csv","r") as csvfile:
         g.add((character_uri,RDFS.label,Literal(row["name"])))
 
         #species relation
-        specie_uri=URIRef(specie_ns[slugify(row["specie"])])
+        specie_uri=URIRef(specie_ns[slugify(row["species"])])
         g.add((character_uri,sw.specie,specie_uri))
         g.add((specie_uri,RDF.type,sw.Specie))
-        g.add((specie_uri,RDFS.label,Literal(row["specie"])))
+        g.add((specie_uri,RDFS.label,Literal(row["species"])))
 
         #homeworld relation
         if row["homeworld"]!="Unknown":
@@ -90,7 +90,7 @@ with open("cities.csv","r") as csvfile:
 
         #attributes
         g.add((city_uri,sw.population,Literal(row["population"],datatype=XSD.integer)))
-        g.add((city_uri,sw.description,row["description"]))
+        g.add((city_uri,sw.description,Literal(row["description"])))
 
 
 
@@ -118,8 +118,8 @@ with open("droids.csv","r") as csvfile:
             if row[float_attribute]:
                 g.add((droid_uri,sw[float_attribute],Literal(row[float_attribute],datatype=XSD.float)))
 
-        for plating_color in row["plating_colors"].split('/'): #splitting incase we want to search for individual plating colors
-            g.add((droid_uri,sw.plating_color,plating_color))
+        for plating_color in row["plating_color"].split('/'): #splitting incase we want to search for individual plating colors
+            g.add((droid_uri,sw.plating_color,Literal(plating_color)))
 
 
 
@@ -134,7 +134,7 @@ with open("films.csv","r") as csvfile:
         g.add((film_uri,sw.director,Literal(row["director"])))
         g.add((film_uri,sw.opening_crawl,Literal(row["opening_crawl"])))
 
-        for producer in row["producers"].split(','):
+        for producer in row["producer"].split(','):
             g.add((film_uri, sw.producer, Literal(producer)))
 
 
@@ -180,11 +180,10 @@ with open("organizations.csv","r") as csvfile:
             g.add((member_uri, RDFS.label,Literal(member)))
 
         if row["affiliation"] is not None and row["affiliation"]!="None":
-            g.add((organization_uri,sw.affiliation,row["affiliation"]))
+            g.add((organization_uri,sw.affiliation,Literal(row["affiliation"])))
 
 
         for film in row["films"].split(", "):
-
             film_uri=URIRef(film_ns[slugify(film)])
             g.add((film_uri,sw.appears_in,film_uri))
             g.add((film_uri,RDF.type,sw.Film))
@@ -266,7 +265,7 @@ with open("species.csv","r") as csvfile:
                 g.add((specie_uri,sw.skin_color,Literal(skin_color)))
 
         if row["homeworld"]!="None" and row["homeworld"]!="Unknown":
-            homeworld_uri=URIRef(planet_uri[slugify(row["homeworld"])])
+            homeworld_uri=URIRef(planet_ns[slugify(row["homeworld"])])
             g.add((specie_uri,sw.homeworld,homeworld_uri))
             g.add((homeworld_uri,RDF.type,sw.Planet))
             g.add((homeworld_uri,RDFS.label,Literal(row["homeworld"])))
@@ -356,7 +355,8 @@ with open("weapons.csv","r") as csvfile:
                 g.add((weapon_uri,sw[string_attribute],Literal(row[string_attribute])))
 
         for float_attribute in ["cost_in_credits","length"]:
-            g.add((weapon_uri,sw[float_attribute],Literal(row[float_attribute],datatype=XSD.float)))
+            if row[float_attribute]:
+                g.add((weapon_uri,sw[float_attribute],Literal(row[float_attribute],datatype=XSD.float)))
 
         for film in row["films"].split(", "):
             film_uri=URIRef(film_ns[slugify(film)])
