@@ -34,6 +34,9 @@ g.bind("starship",starship_ns)
 g.bind("vehicle",vehicle_ns)
 g.bind("weapon",weapon_ns)
 
+#Note: Since the author uses names/titles as "private keys", I will be using them for the URIs (except for quotes, since it only has ids).
+#It should also be noted that some files are missing (events, battles and timeline) because they were either incomplete or had type ambiguity (for example, the victors of battles could be either organizations or a planet('s inhabitants))
+
 with open("characters.csv","r") as csvfile:
     reader = csv.DictReader(csvfile)
 
@@ -45,22 +48,28 @@ with open("characters.csv","r") as csvfile:
         #species relation
         specie_uri=URIRef(specie_ns[slugify(row["specie"])])
         g.add((character_uri,sw.specie,specie_uri))
+        g.add((specie_uri,RDF.type,sw.Specie))
+        g.add((specie_uri,RDFS.label,Literal(row["specie"])))
 
         #homeworld relation
-        homeworld_uri=URIRef(planet_ns[slugify(row["homeworld"])])
-        g.add((character_uri,sw.homeworld,homeworld_uri))
+        if row["homeworld"]!="Unknown":
+            homeworld_uri=URIRef(planet_ns[slugify(row["homeworld"])])
+            g.add((character_uri,sw.homeworld,homeworld_uri))
+            #I added both of these in case they were missing from planets.csv (much like with a set, a rdf graph only adds each triple once, so we can do this without worrying)
+            g.add((homeworld_uri,RDF.type,sw.Planet))
+            g.add((homeworld_uri, RDFS.label, Literal(row["homeworld"])))
 
         #attributes
         for string_attribute in ["gender","hair_color","eye_color","skin_color","description"]:
-            if row[string_attribute]:
+            if row[string_attribute] and row[string_attribute]!="None" and row[string_attribute]!="Unknown":
                 g.add((character_uri,sw[string_attribute],Literal(row[string_attribute])))
 
         for float_attribute in ["height","weight"]:
-            if row[float_attribute]:
+            if row[float_attribute] and row[float_attribute]!="None" and row[float_attribute]!="Unknown":
                 g.add((character_uri,sw[float_attribute],Literal(row[float_attribute],datatype=XSD.float)))
 
         for integer_attribute in ["year_born","year_died"]:
-            if row[integer_attribute]:
+            if row[integer_attribute] and row[integer_attribute]!="None" and row[integer_attribute]!="Unknown":
                 g.add((character_uri,sw[integer_attribute],Literal(row[integer_attribute],datatype=XSD.integer)))
 
 
@@ -76,6 +85,8 @@ with open("cities.csv","r") as csvfile:
         #planet relation
         planet_uri=URIRef(planet_ns[slugify(row["planet"])])
         g.add((city_uri,sw.planet,planet_uri))
+        g.add((planet_uri,RDF.type,sw.Planet))
+        g.add((planet_uri,RDFS.label,Literal(row["planet"])))
 
         #attributes
         g.add((city_uri,sw.population,Literal(row["population"],datatype=XSD.integer)))
@@ -95,6 +106,8 @@ with open("droids.csv","r") as csvfile:
         for film in row["films"].split(', '):
             film_uri=URIRef(film_ns[slugify(film)])
             g.add((droid_uri,sw.appears_in,film_uri))
+            g.add((film_uri,RDF.type,sw.Film))
+            g.add((film_uri,RDFS.label,Literal(film)))
 
         #attributes
         for string_attribute in ["model","manufacturer","sensor_color","primary_function"]:
@@ -105,7 +118,7 @@ with open("droids.csv","r") as csvfile:
             if row[float_attribute]:
                 g.add((droid_uri,sw[float_attribute],Literal(row[float_attribute],datatype=XSD.float)))
 
-        for plating_color in row["plating_colors"].split('/'): #splitting just in case we need it for search
+        for plating_color in row["plating_colors"].split('/'): #splitting incase we want to search for individual plating colors
             g.add((droid_uri,sw.plating_color,plating_color))
 
 
@@ -122,7 +135,6 @@ with open("films.csv","r") as csvfile:
         g.add((film_uri,sw.opening_crawl,Literal(row["opening_crawl"])))
 
         for producer in row["producers"].split(','):
-            producer=producer.strip().replace('"','')
             g.add((film_uri, sw.producer, Literal(producer)))
 
 
@@ -139,6 +151,8 @@ with open("music.csv","r") as csvfile:
 
         film_uri=URIRef(film_ns[slugify(row["associated_with"])])
         g.add((music_uri,sw.associated_with,film_uri))
+        g.add((film_uri,RDF.type,sw.Film))
+        g.add((film_uri,RDFS.label,Literal(row["associated_with"])))
 
 
 
@@ -154,31 +168,208 @@ with open("organizations.csv","r") as csvfile:
         g.add((organization_uri,sw.description,Literal(row["description"])))
 
         for leader in row["leader"].split(", "):
-            leader=leader.strip().replace('"','')
             leader_uri=URIRef(character_ns[slugify(leader)])
-
             g.add((organization_uri, sw.leader,leader_uri))
+            g.add((leader_uri,RDF.type,sw.Character))
+            g.add((leader_uri, RDFS.label,Literal(leader)))
 
         for member in row["members"].split(", "):
-            member=member.strip().replace('"','')
             member_uri=URIRef(character_ns[slugify(member)])
             g.add((organization_uri, sw.member,member_uri))
+            g.add((member_uri,RDF.type,sw.Character))
+            g.add((member_uri, RDFS.label,Literal(member)))
 
         if row["affiliation"] is not None and row["affiliation"]!="None":
             g.add((organization_uri,sw.affiliation,row["affiliation"]))
 
 
         for film in row["films"].split(", "):
-            film=film.strip().replace('"','')
+
             film_uri=URIRef(film_ns[slugify(film)])
             g.add((film_uri,sw.appears_in,film_uri))
+            g.add((film_uri,RDF.type,sw.Film))
+            g.add((film_uri,RDFS.label,Literal(film)))
 
-        if row["affiliation"] is not None:
-            g.add((organization_uri, sw.affiliation, Literal(row["affiliation"])))
+
+with open("planets.csv","r") as csvfile:
+    reader = csv.DictReader(csvfile)
+
+    for row in reader:
+        planet_uri=URIRef(planet_ns[slugify(row["name"])])
+        g.add((planet_uri,RDF.type,sw.Planet))
+        g.add((planet_uri,RDFS.label,Literal(row["name"])))
+        g.add((planet_uri,sw.gravity,Literal(row["gravity"])))
+        g.add((planet_uri,sw.climate,Literal(row["climate"])))
+
+        if row["population"] is not None:
+            g.add((planet_uri,sw.population,Literal(row["population"])))
+
+        for float_attribute in ['diameter','rotation_period','orbital_period','surface_water']:
+            if row[float_attribute]:
+                g.add((planet_uri,sw[float_attribute],Literal(row[float_attribute],datatype=XSD.float)))
+
+        for terrain in row["terrain"].split(", "):
+            g.add((planet_uri,sw.terrain,Literal(terrain)))
+
+        for resident in row["residents"].split(", "):
+            character_uri=URIRef(character_ns[slugify(resident)])
+            g.add((planet_uri,sw.resident,character_uri))
+            g.add((character_uri,RDF.type,sw.Character))
+            g.add((character_uri,RDFS.label,Literal(resident)))
+
+        if row["films"]:
+            for film in row["films"].split(", "):
+                film_uri=URIRef(film_ns[slugify(film)])
+                g.add((planet_uri,sw.appears_in,film_uri))
+                g.add((film_uri,RDF.type,sw.Film))
+                g.add((film_uri,RDFS.label,Literal(film)))
+
+
+
+with open("quotes.csv","r") as csvfile:
+    reader = csv.DictReader(csvfile)
+
+    for row in reader:
+        quote_uri=URIRef(quote_ns[slugify(row["id"])])
+        g.add((quote_uri,RDF.type,sw.Quote))
+
+        character_uri=URIRef(character_ns[slugify(row["character_name"])])
+        g.add((quote_uri,sw.said_by,character_uri)) #I used the passive voice to preserve's the csv order of relations, but if needed this can be changed to the active voice (character said quote)
+        g.add((character_uri,RDF.type,sw.Character))
+        g.add((character_uri,RDFS.label,Literal(row["character_name"])))
+
+        source_uri=URIRef(film_ns[slugify(row["source"])])
+        g.add((quote_uri,sw.appears_in,source_uri))
+        g.add((source_uri,RDF.type,sw.Film))
+        g.add((source_uri,RDFS.label,Literal(row["source"])))
+
+
+
+with open("species.csv","r") as csvfile:
+    reader = csv.DictReader(csvfile)
+
+    for row in reader:
+        specie_uri=URIRef(specie_ns[slugify(row["name"])])
+        g.add((specie_uri,RDF.type,sw.Specie))
+        g.add((specie_uri,RDFS.label,Literal(row["name"])))
+
+        for string_attribute in ["classification","designation","hair_colors","eye_colors","language"]:
+            if row[string_attribute] and row[string_attribute]!="None" and row[string_attribute]!="Unknown":
+                g.add((specie_uri,sw[string_attribute],Literal(row[string_attribute])))
+
+        for float_attribute in ["average_height","average_lifespan"]:
+            if row[float_attribute]:
+                g.add((specie_uri,sw[float_attribute],Literal(row[float_attribute],datatype=XSD.float)))
+
+        if row["skin_colors"]!="Unknown":
+            for skin_color in row["skin_colors"].split(", "):
+                g.add((specie_uri,sw.skin_color,Literal(skin_color)))
+
+        if row["homeworld"]!="None" and row["homeworld"]!="Unknown":
+            homeworld_uri=URIRef(planet_uri[slugify(row["homeworld"])])
+            g.add((specie_uri,sw.homeworld,homeworld_uri))
+            g.add((homeworld_uri,RDF.type,sw.Planet))
+            g.add((homeworld_uri,RDFS.label,Literal(row["homeworld"])))
+
+
+
+with open("starships.csv","r") as csvfile:
+    reader = csv.DictReader(csvfile)
+
+    for row in reader:
+        starship_uri=URIRef(starship_ns[slugify(row["name"])])
+        g.add((starship_uri,RDF.type,sw.Starship))
+        g.add((starship_uri,RDFS.label,Literal(row["name"])))
+
+        for float_attribute in ["cost_in_credits","length","max_atmosphering_speed","cargo_capacity","hyperdrive_rating"]:
+            if row[float_attribute]:
+                g.add((starship_uri,sw[float_attribute],Literal(row[float_attribute],datatype=XSD.float)))
+
+        for integer_attribute in ["crew","passengers","MGLT"]:
+            if row[integer_attribute]:
+                g.add((starship_uri,sw[integer_attribute],Literal(row[integer_attribute],datatype=XSD.integer)))
+
+        for string_attribute in ["model","manufacturer","consumables","starship_class"]:
+            if row[string_attribute]:
+                g.add((starship_uri,sw[string_attribute],Literal(row[string_attribute])))
+
+        if row["pilots"]!="None":
+            for pilot in row["pilots"].split(", "):
+                pilot_uri=URIRef(character_ns[slugify(pilot)])
+                g.add((starship_uri,sw.pilot,pilot_uri))
+                g.add((pilot_uri,RDF.type,sw.Character))
+                g.add((pilot_uri,RDFS.label,Literal(pilot)))
+
+        for film in row["films"].split(", "):
+            film_uri=URIRef(film_ns[slugify(film)])
+            g.add((starship_uri,sw.appears_in,film_uri))
+            g.add((film_uri,RDF.type,sw.Film))
+            g.add((film_uri,RDFS.label,Literal(film)))
+
+
+
+with open("vehicles.csv","r") as csvfile:
+    reader = csv.DictReader(csvfile)
+
+    for row in reader:
+        vehicle_uri=URIRef(vehicle_ns[slugify(row["name"])])
+        g.add((vehicle_uri,RDF.type,sw.Vehicle))
+        g.add((vehicle_uri,RDFS.label,Literal(row["name"])))
+
+        for string_attribute in ["model","manufacturer","consumables","vehicle_class"]:
+            if row[string_attribute] and row[string_attribute]!="None" and row[string_attribute]!="Unknown":
+                g.add((vehicle_uri,sw[string_attribute],Literal(row[string_attribute])))
+
+        for float_attribute in ["cost_in_credits","length","max_atmosphering_speed","cargo_capacity"]:
+            if row[float_attribute]:
+                g.add((vehicle_uri,sw[float_attribute],Literal(row[float_attribute],datatype=XSD.float)))
+
+        for integer_attribute in ["crew","passengers"]:
+            if row[integer_attribute]:
+                g.add((vehicle_uri,sw[integer_attribute],Literal(row[integer_attribute],datatype=XSD.integer)))
+
+        if row["pilots"]!="None":
+            for pilot in row["pilots"].split(", "):
+                pilot_uri=URIRef(character_ns[slugify(pilot)])
+                g.add((vehicle_uri,sw.pilot,pilot_uri))
+                g.add((pilot_uri,RDF.type,sw.Character))
+                g.add((pilot_uri,RDFS.label,Literal(pilot)))
+
+        for film in row["films"].split(", "):
+            film_uri=URIRef(film_ns[slugify(film)])
+            g.add((vehicle_uri,sw.appears_in,film_uri))
+            g.add((film_uri,RDF.type,sw.Film))
+            g.add((film_uri,RDFS.label,Literal(film)))
+
+
+
+with open("weapons.csv","r") as csvfile:
+    reader = csv.DictReader(csvfile)
+
+    for row in reader:
+        weapon_uri=URIRef(weapon_ns[slugify(row["name"])])
+        g.add((weapon_uri,RDF.type,sw.Weapon))
+        g.add((weapon_uri,RDFS.label,Literal(row["name"])))
+
+        for string_attribute in ["model","manufacturer","type","description"]:
+            if row[string_attribute]:
+                g.add((weapon_uri,sw[string_attribute],Literal(row[string_attribute])))
+
+        for float_attribute in ["cost_in_credits","length"]:
+            g.add((weapon_uri,sw[float_attribute],Literal(row[float_attribute],datatype=XSD.float)))
+
+        for film in row["films"].split(", "):
+            film_uri=URIRef(film_ns[slugify(film)])
+            g.add((weapon_uri,sw.appears_in,film_uri))
+            g.add((film_uri,RDF.type,sw.Film))
+            g.add((film_uri,RDFS.label,Literal(film)))
+
+
+
 
 rdf_xml=g.serialize(format="xml")
 
-with open("characters.xml","w") as f:
+with open("starwars_rdf.xml","w") as f:
     f.write(rdf_xml)
 
 
