@@ -14,7 +14,7 @@ store = SPARQLStore("http://graphdb:7200/repositories/starwars", context_aware=F
 graph = Graph(store)
 
 
-def home(request):  # TODO: add an actual home page
+def home(request):
     return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(graph)})
 
 def handle_404_error(request,exception):
