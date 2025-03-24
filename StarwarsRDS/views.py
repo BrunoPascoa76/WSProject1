@@ -1,6 +1,14 @@
 from django.shortcuts import render
+from os import getenv
 
-# Create your views here.
+from rdflib import Graph
+from rdflib.plugins.stores.sparqlstore import SPARQLStore
+from .utils import rdflib_graph_to_html
 
-def home(request): #TODO: add an actual home page
-    pass
+store = SPARQLStore("http://graphdb:7200/repositories/starwars", context_aware=False, returnFormat='json',
+                    method='GET')
+graph = Graph(store)
+
+
+def home(request):  # TODO: add an actual home page
+    return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(graph)})
