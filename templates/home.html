@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <div class="jumbotron text-center"> {# Add a jumbotron for a more prominent welcome section #}
+        <h1 class="display-4">Welcome to the Starwars Dataverse</h1>
+        <p class="lead">May the force be with you</p>
+        <hr class="my-2"> {# Add a horizontal line to separate content #}
+    </div>
+    {{ graph_html | safe }}
+{% endblock %}
+
+
+{% block scripts %}
+     <script>
+        // Custom JavaScript code
+        network.on("click", function(params) {
+            if (params.nodes.length > 0) {
+                var nodeId = params.nodes[0];
+                var node = network.body.data.nodes.get(nodeId);
+                if (node && node.url) {
+                    window.open(node.url, "_blank");
+                }
+            }
+        });
+    </script>
+{% endblock %}

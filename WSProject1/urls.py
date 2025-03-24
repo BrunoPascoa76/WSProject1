@@ -16,7 +16,12 @@ Including another URLconf
 """
 # from django.contrib import admin
 from django.urls import path
+from StarwarsRDS import views
+from django.conf.urls import handler404
 
+handler404 = views.handle_404_error
 urlpatterns = [
     #    path('admin/', admin.site.urls),
+    path('', views.home, name='home'),
+    path('search',views.search, name='search'),
 ]
