@@ -12,8 +12,7 @@ services:
       - GRAPHDB_URL=http://graphdb:7200/repositories/starwars
     ports:
       - "8000:8000"
-    command:
-      - sh -c "pip install -r requirements.txt && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "pip install -r requirements.txt && python manage.py runserver 0.0.0.0:8000"
 
   graphdb:
     image: ontotext/graphdb:10.8.4
@@ -21,10 +20,11 @@ services:
     ports:
       - "7200:7200"#
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7200/repositories/starwars"] #the first time, will only pass once we do the setup
+      test: ["CMD", "curl", "-f","-X","POST","-H","Content-Type: application/x-www-form-urlencoded","--data-urlencode","query=SELECT * WHERE { ?s ?p ?o } LIMIT 0", "http://localhost:7200/repositories/starwars"] #the first time, will only pass once we do the setup
       interval: 10s
       timeout: 5s
       retries: 100 #if the first-time initializing is not done by ~1500s, then please do so and then restart docker (if the first-time setup is done by then, the web container will start up by itself)
+      #start_period: 30s
     volumes:
       - ./graphdb/data:/opt/graphdb/home
       - ./graphdb/import:/root/graphdb-import
