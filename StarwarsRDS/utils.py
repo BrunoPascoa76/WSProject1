@@ -1,5 +1,7 @@
 import json
 import re
+from urllib.parse import urlparse
+
 
 from rdflib import URIRef, Literal
 from rdflib.extras.external_graph_libs import rdflib_to_networkx_graph
@@ -32,3 +34,7 @@ def to_human_readable(node):
     if isinstance(node, URIRef):
         return re.split(r'[/#]',str(node))[-1]
     return str(node)
+
+def is_valid_uri(search_string): #apparently this divides into the components, and if it has them all, then it should be at least close enough to a valid uri to not result in an error
+    parsed=urlparse(search_string)
+    return all([parsed.scheme,parsed.netloc])

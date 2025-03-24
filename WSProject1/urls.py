@@ -23,4 +23,5 @@ handler404 = views.handle_404_error
 urlpatterns = [
     #    path('admin/', admin.site.urls),
     path('', views.home, name='home'),
+    path('search',views.search, name='search'),
 ]
