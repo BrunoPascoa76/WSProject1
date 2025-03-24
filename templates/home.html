@@ -3,8 +3,11 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <h1>Welcome to the Starwars Dataverse</h1>
-    <h2>May the force be with you</h2>
+    <div class="jumbotron text-center"> {# Add a jumbotron for a more prominent welcome section #}
+        <h1 class="display-4">Welcome to the Starwars Dataverse</h1>
+        <p class="lead">May the force be with you</p>
+        <hr class="my-2"> {# Add a horizontal line to separate content #}
+    </div>
     {{ graph_html | safe }}
 {% endblock %}
 

@@ -12,3 +12,6 @@ graph = Graph(store)
 
 def home(request):  # TODO: add an actual home page
     return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(graph)})
+
+def handle_404_error(request,exception):
+    return render(request,'error404.html')
