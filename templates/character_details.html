@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block styles %}{% endblock %}
+
+{% block title %}Character List{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character List</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-4">Character Details</h2>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">{{ character.label }}</h4>
+                <p><strong>Species:</strong> {{ character.species }}</p>
+                <p><strong>Homeworld:</strong> {{ character.homeworld }}</p>
+                <p><strong>Gender:</strong> {{ character.gender }}</p>
+                <p><strong>Hair Color:</strong> {{ character.hair_color }}</p>
+                <p><strong>Eye Color:</strong> {{ character.eye_color }}</p>
+                <p><strong>Skin Color:</strong> {{ character.skin_color }}</p>
+                <p><strong>Description:</strong> {{ character.description }}</p>
+                <p><strong>Height:</strong> {{ character.height }} cm</p>
+                <p><strong>Weight:</strong> {{ character.weight }} kg</p>
+                <p><strong>Year Born:</strong> {{ character.year_born }}</p>
+                <p><strong>Year Died:</strong> {{ character.year_died }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

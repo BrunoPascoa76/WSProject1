@@ -23,5 +23,9 @@ handler404 = views.handle_404_error
 urlpatterns = [
     #    path('admin/', admin.site.urls),
     path('', views.home, name='home'),
+     path('characters', views.character_list, name='character_list'),
+    path('edit/<path:character_uri>/', views.edit_character, name='edit_character'),
+    path('characters/<path:uri>', views.character_details , name='character_details'),
+
     path('search',views.search, name='search'),
 ]
