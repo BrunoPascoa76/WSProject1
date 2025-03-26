@@ -19,6 +19,9 @@ services:
     container_name: graphdb
     ports:
       - "7200:7200"#
+    environment:
+      - GRAPHDB_URL=http://graphdb:7200/repositories/starwars
+      - GRAPHDB_UPDATE_URL=http://graphdb:7200/repositories/starwars/update
     healthcheck:
       test: ["CMD", "curl", "-f","-X","POST","-H","Content-Type: application/x-www-form-urlencoded","--data-urlencode","query=SELECT * WHERE { ?s ?p ?o } LIMIT 0", "http://localhost:7200/repositories/starwars"] #the first time, will only pass once we do the setup
       interval: 10s
