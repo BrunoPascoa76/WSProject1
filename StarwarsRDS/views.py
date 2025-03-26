@@ -48,7 +48,7 @@ def search(request):
             }
         """
 
-    results = graph.query(str(query),initBindings={'q':URIRef(q) if is_valid_uri(q) else Literal(q)})
+    results = graph.query(query,initBindings={'q':URIRef(q) if is_valid_uri(q) else Literal(q)})
 
     if len(results) == 1:
         result = next(iter(results))
@@ -63,59 +63,30 @@ def search(request):
             })
         return render(request, 'search.html', {'results': results_list, 'query_string': re.split(r'[/#]', q)[-1]})
 
-
-def description(request, _type, _name):
+def character_details(request,_name):
     match request.method:
         case 'GET':
-            return get_description(request)
-        case 'POST':
-            return add_description(request)
-        case 'PUT':
-            return update_description(request)
-        case 'DELETE':
-            return delete_description(request)
+            details=defaultdict(list)
+
+            uri=request.build_absolute_uri()
+            query = """
+            SELECT DISTINCT ?p ?o ?sName
+            WHERE {
+                ?uri ?p ?o .
+                OPTIONAL { ?o rdfs:label ?sName }
+            }
+            """
+
+            result=graph.query(query,initBindings={'uri':URIRef(uri)})
+
+            for p, o, oName in result:
+                p_human_readable = to_human_readable(p)
+                if oName: #while I talk about them generically here, you can use them by name on the template
+                    details[p_human_readable].append((str(o),str(oName)))
+                else:
+                    details[p_human_readable].append(str(o))
+
+            return render(request,"character_details.html", {"character": details})
 
 
-def get_description(request):
-    uri = request.build_absolute_uri()
-    attributes = defaultdict(list)
-    relations = defaultdict(list)
-
-    # will need to divide between triples where the object is a literal ("attributes") and ones where the objects is a URI ("relations") for later (because on update, I need to know whether  I need to add the type for consistency's sake
-    attributes_query = """
-        SELECT ?p ?o
-        WHERE {
-            ?uri ?p ?o .
-        }
-    """
-
-    for p, o in graph.query(attributes_query, initBindings={"uri": URIRef(uri)}):
-        p_human_readable = to_human_readable(p)
-        attributes[p_human_readable].append(o)
-
-    relations_query = """
-        SELECT DISTINCT ?p ?o ?oName
-        WHERE {
-            ?uri ?p ?o .
-            ?o rdfs:label ?oName .
-        }
-    """
-
-    for p, o, oName in graph.query(relations_query, initBindings={"uri": URIRef(uri)}):
-        p_human_readable = to_human_readable(p)
-        relations[p_human_readable].append((o, oName))
-
-    return render(request, 'description.html',
-                  {'label': attributes["label"][0], 'attributes': attributes, 'relations': relations})
-
-
-def add_description(request):
-    pass
-
-
-def update_description(request):
-    pass
-
-
-def delete_description(request):
-    pass
+        #os outros faço depois de teres o form
