@@ -24,5 +24,5 @@ urlpatterns = [
     #    path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('search',views.search, name='search'),
-    path('<str:_type>/<str:_name>',views.description, name='description'),
+    path('<str:_type>/',views.type_graph, name='description'),
 ]
