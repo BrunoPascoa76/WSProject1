@@ -12,7 +12,7 @@ from rdflib import Graph, URIRef, Literal, RDFS, RDF
 from rdflib.plugins.stores.sparqlstore import SPARQLStore, SPARQLUpdateStore
 from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable
 
-store = SPARQLUpdateStore(getenv("GRAPHDB_URL"), getenv("GRAPHDB_UPDATE_URL"), context_aware=False, returnFormat='json')
+store = SPARQLUpdateStore(getenv("GRAPHDB_URL"), getenv("GRAPHDB_UPDATE_URL"), context_aware=False)
 graph = Graph(store)
 
 
@@ -73,6 +73,6 @@ def type_graph(request,_type):
             ?p ?o .
     }
     """
-    uri=request.build_absolute_uri()
+    uri=request.build_absolute_uri()[:-1] #to remove the last "/"
     local_graph=graph.query(query,initBindings={'type':URIRef(uri)}).graph
-    return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(local_graph,True)})
+    return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(local_graph)})
