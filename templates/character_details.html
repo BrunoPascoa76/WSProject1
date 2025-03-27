@@ -1,8 +1,52 @@
 {% extends 'base.html' %}
 
-{% block styles %}{% endblock %}
+{% block styles %}
+<style>
+    body {
+        background-color: #f4f4f9;
+        font-family: 'Arial', sans-serif;
+    }
+    .character-container {
+        max-width: 600px;
+        margin: auto;
+    }
+    .character-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+    .character-title {
+        text-align: center;
+        color: #333;
+    }
+    .icon {
+        margin-right: 8px;
+    }
+    .btn-close.red-btn {
+        background-color: transparent;
+        border: none;
+        color: red;
+        font-size: 1.5rem; /* Adjust the size of the 'X' */
+    }
 
-{% block title %}Character List{% endblock %}
+    .btn-close.red-btn::before {
+        content: '×'; /* Unicode for 'X' */
+        color: red; /* Red color for the 'X' */
+        font-weight: bold;
+    }
+
+    .btn-close.red-btn:hover,
+    .btn-close.red-btn:focus {
+        color: darkred; /* Darker red color on hover/focus */
+        background-color: transparent;
+        outline: none;
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block title %}Character Details{% endblock %}
 
 {% block content %}
 <!DOCTYPE html>
@@ -13,28 +57,90 @@
     <title>Character List</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
-<body>
-    <div class="container mt-4">
-        <h2 class="mb-4">Character Details</h2>
-        <div class="card">
+<div class="container mt-5">
+    <div class="character-container">
+        <h2 class="character-title"><i class="fas fa-user"></i> {{ character.label.value }}</h2>
+        <div class="card character-card">
             <div class="card-body">
-                <h4 class="card-title">{{ character.label }}</h4>
-                <p><strong>Species:</strong> {{ character.species }}</p>
-                <p><strong>Homeworld:</strong> {{ character.homeworld }}</p>
-                <p><strong>Gender:</strong> {{ character.gender }}</p>
-                <p><strong>Hair Color:</strong> {{ character.hair_color }}</p>
-                <p><strong>Eye Color:</strong> {{ character.eye_color }}</p>
-                <p><strong>Skin Color:</strong> {{ character.skin_color }}</p>
-                <p><strong>Description:</strong> {{ character.description }}</p>
-                <p><strong>Height:</strong> {{ character.height }} cm</p>
-                <p><strong>Weight:</strong> {{ character.weight }} kg</p>
-                <p><strong>Year Born:</strong> {{ character.year_born }}</p>
-                <p><strong>Year Died:</strong> {{ character.year_died }}</p>
+                <p><i class="fas fa-dna icon"></i><strong>Species:</strong> {{ character.species_label.value }}</p>
+                <p><i class="fas fa-globe icon"></i><strong>Homeworld:</strong> {{ character.homeworld_label.value }}</p>
+                <p><i class="fas fa-venus-mars icon"></i><strong>Gender:</strong> {{ character.gender.value }}</p>
+                <p><i class="fas fa-cut icon"></i><strong>Hair Color:</strong> {{ character.hair_color.value }}</p>
+                <p><i class="fas fa-eye icon"></i><strong>Eye Color:</strong> {{ character.eye_color.value }}</p>
+                <p><i class="fas fa-paint-brush icon"></i><strong>Skin Color:</strong> {{ character.skin_color.value }}</p>
+                <p><i class="fas fa-align-left icon"></i><strong>Description:</strong> {{ character.description.value }}</p>
+                <p><i class="fas fa-ruler-vertical icon"></i><strong>Height:</strong> {{ character.height.value }} cm</p>
+                <p><i class="fas fa-weight icon"></i><strong>Weight:</strong> {{ character.weight.value }} kg</p>
+                <p><i class="fas fa-baby icon"></i><strong>Year Born:</strong> {{ character.year_born.value }}</p>
+                <p><i class="fas fa-skull icon"></i><strong>Year Died:</strong> {{ character.year_died.value }}</p>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <button class="btn btn-primary edit-attributes-btn"
+                data-toggle="modal" 
+                data-target="#editModal"
+                data-uri="{{ character.uri|urlencode }}">
+                Edit Attributes
+            </button>
+        
+            <button class="btn btn-secondary edit-relations-btn"
+                data-toggle="modal" 
+                data-target="#editModal"
+                data-uri="{{ character.uri|urlencode }}">
+                Edit Relations
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for editing character attributes and relations -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Character</h5>
+                <button type="button" class="btn-close red-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="editModalContent">
             </div>
         </div>
     </div>
-</body>
+</div>
+
+
+
 {% endblock %}
 
 {% block scripts %}
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+        crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        var editModal = new bootstrap.Modal(document.getElementById('editModal')); // Initialize modal instance
+
+        $('.edit-attributes-btn').click(function () {
+            var characterUri = $(this).data('uri');
+            var decodedUri = decodeURIComponent(characterUri);
+            $('#editModalContent').load(`/edit/attributes/${decodedUri}/`, function () {
+                editModal.show(); // Show the modal after content is loaded
+            });
+        });
+
+        $('.edit-relations-btn').click(function () {
+            var characterUri = $(this).data('uri');
+            var decodedUri = decodeURIComponent(characterUri);
+            $('#editModalContent').load(`/edit/relations/${decodedUri}/`, function () {
+                editModal.show(); // Show the modal after content is loaded
+            });
+        });
+    });
+</script>
+        
+
 {% endblock %}

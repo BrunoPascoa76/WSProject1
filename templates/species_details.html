@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<style>
+    body {
+        background-color: #f4f4f9;
+        font-family: 'Arial', sans-serif;
+    }
+    .character-container {
+        max-width: 600px;
+        margin: auto;
+    }
+    .character-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+    .character-title {
+        text-align: center;
+        color: #333;
+    }
+    .icon {
+        margin-right: 8px;
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block title %}Organization Details{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Details</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<div class="container mt-5">
+    <div class="character-container">
+        <h2 class="character-title"><i class="fa-solid fa-dna icon"></i> {{ attributes.label|first }}</h2> <!-- Species Name -->
+        <div class="card character-card">
+            <div class="card-body">
+                <p><i class="fa-solid fa-globe icon"></i><strong>Homeworld:</strong> {{ relations.homeworld|first }}</p>
+                <p><i class="fa-solid fa-palette icon"></i><strong>Skin Colors:</strong> {{ attributes.skin_color|join:", " }}</p>
+                <p><i class="fa-solid fa-paw icon"></i><strong>Classification:</strong> {{ attributes.classification|first }}</p>
+                <p><i class="fa-solid fa-brain icon"></i><strong>Designation:</strong> {{ attributes.designation|first }}</p>
+                <p><i class="fa-solid fa-eye icon"></i><strong>Eye Colors:</strong> {{ attributes.eye_colors|join:", " }}</p>
+                <p><i class="fa-solid fa-language icon"></i><strong>Language:</strong> {{ attributes.language|first }}</p>
+                <p><i class="fa-solid fa-ruler-vertical icon"></i><strong>Average Height:</strong> {{ attributes.average_height|first }}m</p>
+                <p><i class="fa-solid fa-hourglass-half icon"></i><strong>Average Lifespan:</strong> {{ attributes.average_lifespan|first }} years</p>
+                <p><i class="fa-solid fa-scissors icon"></i><strong>Hair Colors:</strong> {{ attributes.hair_colors|join:", " }}</p>
+            </div>
+        </div>
+
+        <button class="btn btn-primary edit-btn" data-toggle="modal" data-target="#editModal" data-uri="{{ character.uri|urlencode }}">
+            Edit
+        </button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+        crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('.edit-btn').click(function () {
+            var characterUri = $(this).data('uri');
+            var decodedUri = decodeURIComponent(characterUri);
+            console.log(characterUri);
+            console.log(decodedUri);
+            $('#editModalContent').load(`/edit/${decodedUri}/`, function () {
+                $('#editModal').modal('show');
+            });
+        });
+    });
+</script>
+
+{% endblock %}

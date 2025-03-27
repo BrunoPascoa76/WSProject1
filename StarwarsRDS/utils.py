@@ -8,7 +8,7 @@ from rdflib.extras.external_graph_libs import rdflib_to_networkx_graph
 import networkx as nx
 from pyvis.network import Network
 
-def rdflib_graph_to_html(graph):
+def rdflib_graph_to_html(graph,physics_enabled=False):
     """Generates the html code for an interactible graph based on an rdflib input"""
     nx_graph=rdflib_to_networkx_graph(graph,edge_attrs=lambda s,p,o: {'label': to_human_readable(p)})
 
@@ -25,7 +25,7 @@ def rdflib_graph_to_html(graph):
     net=Network(height="750px",width="100%",notebook=False,cdn_resources='remote')
     net.from_nx(nx_graph)
 
-    net.options.physics.enabled = False
+    net.options.physics.enabled = physics_enabled
 
     return net.generate_html()
 

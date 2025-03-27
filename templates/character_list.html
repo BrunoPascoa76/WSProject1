@@ -1,7 +1,9 @@
 <!-- character_list.html -->
 {% extends 'base.html' %}
 
-{% block styles %}{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
 
 {% block title %}Character List{% endblock %}
 
@@ -17,7 +19,12 @@
 <body>
 
 <div class="container">
-    <h1>Star Wars Characters</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Star Wars Characters</h1>
+        <a href="#" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -31,20 +38,14 @@
             {% for character in characters %}
             <tr>
                 <td>{{ character.label }}</td>
-                <td>{{ character.species }}</td>
-                <td>{{ character.homeworld }}</td>
+                <td>{{ character.species_label }}</td>
+                <td>{{ character.homeworld_label}}</td>
                 <td>
                 <a href="{% url 'character_details' character.uri %}" class="btn btn-info">
-                    <i class="fas fa-eye"></i> View
+                    <i class="fas fa-eye"></i>
                 </a>
                 <button class="btn btn-danger delete-btn" data-uri="{{ character.uri|urlencode }}">
-                    Delete
-                </button>
-                <button class="btn btn-primary edit-btn"
-                    data-toggle="modal" 
-                    data-target="#editModal"
-                    data-uri="{{ character.uri|urlencode }}">
-                    Edit
+                    <i class="fas fa-trash"></i>
                 </button>
                 </td>
             </tr>
@@ -53,12 +54,40 @@
     </table>
 </div>
 
-<!-- Modal for editing character -->
-<!-- Modal for editing character -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div id="editModalContent"></div>  <!-- This will be filled with the modal content -->
+
+<!-- Attribute Edit Modal -->
+<div class="modal fade" id="editAttributesModal" tabindex="-1" aria-labelledby="editAttributesLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editAttributesLabel">Edit Character Attributes</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editAttributesContent">
+                <!-- Attributes form will be loaded here via AJAX -->
+            </div>
+        </div>
+    </div>
 </div>
 
+<!-- Relations Edit Modal -->
+<div class="modal fade" id="editRelationsModal" tabindex="-1" aria-labelledby="editRelationsLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRelationsLabel">Edit Character Relations</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editRelationsContent">
+                <!-- Relations form will be loaded here via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -79,6 +108,28 @@
             console.log(decodedUri);
             $('#editModalContent').load(`/edit/${decodedUri}/`, function () {
                 $('#editModal').modal('show');
+            });
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('.delete-btn').click(function () {
+            var characterUri = $(this).data('uri');
+            var decodedUri = decodeURIComponent(characterUri);
+            var row = $(this).closest('tr'); // Get the row to remove it after deletion
+
+            $.ajax({
+                url: `/character/delete/${decodedUri}/`,
+                type: "POST",
+                headers: { "X-CSRFToken": "{{ csrf_token }}" },  // Include CSRF token
+                success: function () {
+                    row.remove(); // Instantly remove the row from the table
+                },
+                error: function () {
+                    console.error("Error deleting character.");
+                }
             });
         });
     });
