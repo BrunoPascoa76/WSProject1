@@ -31,6 +31,10 @@ accessor = GraphDBApi(client)
 store = SPARQLUpdateStore("http://localhost:7200/repositories/starwars", context_aware=False, returnFormat='json')
 graph = Graph(store)
 
+# Uncomment the following lines if you want to use the GraphDB SPARQLStore in docker
+""" store = SPARQLUpdateStore(getenv("GRAPHDB_URL"), getenv("GRAPHDB_UPDATE_URL"), context_aware=False)
+graph = Graph(store) """
+
 
 def home(request):
     return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(graph)})
@@ -64,7 +68,7 @@ def search(request):
             }
         """
 
-    results = graph.query(str(query),initBindings={'q':URIRef(q) if is_valid_uri(q) else Literal(q)})
+    results = graph.query(query,initBindings={'q':URIRef(q) if is_valid_uri(q) else Literal(q)})
 
     if len(results) == 1:
         result = next(iter(results))
@@ -79,69 +83,54 @@ def search(request):
             })
         return render(request, 'search.html', {'results': results_list, 'query_string': re.split(r'[/#]', q)[-1]})
 
+def type_graph(request,_type):
+    query="""
+    CONSTRUCT {
+        ?s rdf:type ?type ;
+               ?p ?o .
+    }WHERE{
+        ?s rdf:type ?type ;
+            ?p ?o .
+    }
+    """
+    uri=request.build_absolute_uri()[:-1] #to remove the last "/"
+    local_graph=graph.query(query,initBindings={'type':URIRef(uri)}).graph
+    return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(local_graph)})
 
 def description(request, _type, _name):
     match request.method:
         case 'GET':
-            return get_description(request)
+            return 0
+            #return get_description(request)
         case 'POST':
-            return add_description(request)
+            #return add_description(request)
+            return 0
         case 'PUT':
-            return update_description(request)
+            #return update_description(request)
+            return 0
         case 'DELETE':
-            return delete_description(request)
+            #return delete_description(request)
+            return 0
 
 
-def get_description(request):
-    print("request",request)
-    uri = request.build_absolute_uri()
-    print("URI:", uri)
-    uri ="http://localhost:8000/"+ type + "/"+ uri
-    attributes = defaultdict(list)
-    relations = defaultdict(list)
+#def get_description(request):
+#    uri = request.build_absolute_uri()
+#    attributes = defaultdict(list)
+#    relations = defaultdict(list)
 
     # will need to divide between triples where the object is a literal ("attributes") and ones where the objects is a URI ("relations") for later (because on update, I need to know whether  I need to add the type for consistency's sake
-    attributes_query = """
-        SELECT ?p ?o
-        WHERE {
-            ?uri ?p ?o .
-        }
-    """
+#    attributes_query = """
+#        SELECT ?p ?o
+#        WHERE {
+#            ?uri ?p ?o .
+#        }
+#    """
+#    uri=request.build_absolute_uri()[:-1] #to remove the last "/"
+#    local_graph=graph.query(query,initBindings={'type':URIRef(uri)}).graph    
+#    print("Attributes:", attributes)
+#    print("Relations:", relations)
 
-    for p, o in graph.query(attributes_query, initBindings={"uri": URIRef(uri)}):
-        p_human_readable = to_human_readable(p)
-        attributes[p_human_readable].append(o)
-
-    relations_query = """
-        SELECT DISTINCT ?p ?o ?oName
-        WHERE {
-            ?uri ?p ?o .
-            ?o rdfs:label ?oName .
-        }
-    """
-
-    for p, o, oName in graph.query(relations_query, initBindings={"uri": URIRef(uri)}):
-        p_human_readable = to_human_readable(p)
-        relations[p_human_readable].append((o, oName))
-    
-    print("Attributes:", attributes)
-    print("Relations:", relations)
-
-    return render(request, 'description.html',
-                  {'label': attributes["label"][0], 'attributes': attributes, 'relations': relations})
-
-
-def add_description(request):
-    pass
-
-
-def update_description(request):
-    pass
-
-
-def delete_description(request):
-    pass
-# Character views
+#    return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(local_graph)})# Character views
 
 def get_character_data(character_uri):
     query = f"""

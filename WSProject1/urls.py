@@ -53,5 +53,5 @@ urlpatterns = [
 
 
     path('search',views.search, name='search'),
-    path('<str:_type>/<str:_name>',views.description, name='description'),
+    path('<str:_type>/',views.type_graph, name='description'),
 ]

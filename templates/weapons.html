@@ -40,7 +40,7 @@
                 <td>{{ weapons_data.model}}</td>
                 <td>{{ weapons_data.type}}</td>
                 <td>
-                <a href="{% url 'weapon_details' _url %}" class="btn btn-info">
+                <a href="{% url 'weapon_details' weapons_url %}" class="btn btn-info">
                     <i class="fas fa-eye"></i>
                 </a>
                 <button class="btn btn-danger delete-btn" data-uri="{{ species_url|urlencode }}">

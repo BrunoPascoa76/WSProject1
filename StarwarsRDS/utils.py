@@ -22,7 +22,7 @@ def rdflib_graph_to_html(graph,physics_enabled=False):
     nx_graph=nx.relabel_nodes(nx_graph,new_labels,copy=False)
 
 
-    net=Network(height="750px",width="100%",notebook=False,cdn_resources='remote')
+    net=Network(height="750px",width="100%",notebook=False,cdn_resources='remote',filter_menu=True)
     net.from_nx(nx_graph)
 
     net.options.physics.enabled = physics_enabled
