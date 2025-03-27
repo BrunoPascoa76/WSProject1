@@ -185,7 +185,7 @@ with open("organizations.csv","r") as csvfile:
 
         for film in row["films"].split(", "):
             film_uri=URIRef(film_ns[slugify(film)])
-            g.add((film_uri,sw.appears_in,film_uri))
+            g.add((organization_uri,sw.appears_in,film_uri))
             g.add((film_uri,RDF.type,sw.Film))
             g.add((film_uri,RDFS.label,Literal(film)))
 
@@ -225,22 +225,25 @@ with open("planets.csv","r") as csvfile:
 
 
 
-with open("quotes.csv","r") as csvfile:
+with open("quotes.csv", "r") as csvfile:
     reader = csv.DictReader(csvfile)
 
     for row in reader:
-        quote_uri=URIRef(quote_ns[slugify(row["id"])])
-        g.add((quote_uri,RDF.type,sw.Quote))
+        quote_uri = URIRef(quote_ns[slugify(row["id"])])
+        g.add((quote_uri, RDF.type, sw.Quote))
 
-        character_uri=URIRef(character_ns[slugify(row["character_name"])])
-        g.add((quote_uri,sw.said_by,character_uri)) #I used the passive voice to preserve's the csv order of relations, but if needed this can be changed to the active voice (character said quote)
-        g.add((character_uri,RDF.type,sw.Character))
-        g.add((character_uri,RDFS.label,Literal(row["character_name"])))
+        # Add the quote text
+        g.add((quote_uri, RDFS.label, Literal(row["quote"])))
 
-        source_uri=URIRef(film_ns[slugify(row["source"])])
-        g.add((quote_uri,sw.appears_in,source_uri))
-        g.add((source_uri,RDF.type,sw.Film))
-        g.add((source_uri,RDFS.label,Literal(row["source"])))
+        character_uri = URIRef(character_ns[slugify(row["character_name"])])
+        g.add((quote_uri, sw.said_by, character_uri))
+        g.add((character_uri, RDF.type, sw.Character))
+        g.add((character_uri, RDFS.label, Literal(row["character_name"])))
+
+        source_uri = URIRef(film_ns[slugify(row["source"])])
+        g.add((quote_uri, sw.appears_in, source_uri))
+        g.add((source_uri, RDF.type, sw.Film))
+        g.add((source_uri, RDFS.label, Literal(row["source"])))
 
 
 

@@ -1,24 +1,77 @@
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Home - Starwars Dataverse{% endblock %}
 
-{% block content %}
-    <div class="jumbotron text-center"> {# Add a jumbotron for a more prominent welcome section #}
-        <h1 class="display-4">Welcome to the Starwars Dataverse</h1>
-        <p class="lead">May the force be with you</p>
-        <hr class="my-2"> {# Add a horizontal line to separate content #}
-    </div>
-    {{ graph_html | safe }}
+{% block styles %}
+    <style>
+        /* Star Wars background */
+        body {
+            background: url('https://t4.ftcdn.net/jpg/02/22/57/71/360_F_222577179_MTxLtAKP3nwY5LEyKva28oCt0xO4qxJ2.jpg');
+            color: yellow;
+            font-family: 'Star Jedi', Arial, sans-serif;
+        }
+
+        .jumbotron {
+
+            text-align: center;
+        }
+
+        /* Star Wars text animation */
+        h1.display-4 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            animation: starWarsText 5s linear infinite;
+            color:yellow    ;
+        }
+
+        /* Star Wars crawl effect */
+        .crawl {
+            overflow: hidden;
+            height: 200px;
+            position: relative;
+        }
+
+        .crawl p {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            animation: scrollText 10s linear infinite;
+            color: yellow;
+        }
+
+        /* Graph container */
+        #graph-container {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid yellow;
+            padding: 20px;
+            border-radius: 10px;
+        }
+    </style>
 {% endblock %}
 
+{% block content %}
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Welcome to the Star Wars Dataverse</h1>
+        <div class="crawl">
+            <p>May the Force be with you...</p>
+        </div>
+        <hr class="my-2">
+    </div>
+
+    <div id="graph-container">
+        {{ graph_html | safe }}
+    </div>
+{% endblock %}
 
 {% block scripts %}
-     <script>
-        // Custom JavaScript code
+    <script>
+        // Custom JavaScript for interactive graph nodes
         network.on("click", function(params) {
             if (params.nodes.length > 0) {
                 var nodeId = params.nodes[0];
                 var node = network.body.data.nodes.get(nodeId);
+                print("Node",node)
                 if (node && node.url) {
                     window.open(node.url, "_blank");
                 }
