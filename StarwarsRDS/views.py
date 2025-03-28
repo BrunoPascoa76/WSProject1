@@ -15,11 +15,11 @@ from urllib.parse import unquote
 
 from rdflib import Graph, URIRef, Literal, RDFS, RDF
 from rdflib.plugins.stores.sparqlstore import SPARQLStore, SPARQLUpdateStore
-from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable, get_details
+from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable, get_details, get_list
 
 endpoint = "http://localhost:7200/"
 
-store = SPARQLUpdateStore("http://localhost:7200/repositories/starwars", context_aware=False, returnFormat='')
+store = SPARQLUpdateStore(getenv("GRAPHDB_URL"), getenv("GRAPHDB_UPDATE_URL"), context_aware=False)
 graph = Graph(store)
 
 
@@ -85,22 +85,64 @@ def type_graph(request,_type):
     return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(local_graph)})
 
 
-details_query="""
-SELECT ?p ?o ?oName
-WHERE{
-    ?uri ?p ?o .
-    OPTIONAL { ?o rdfs:label ?oName . }
-}
-"""
-
-
 def character_details(request,_id):
-    details=get_details(request)
-
+    details=get_details(request.build_absolute_uri(),graph)
     return render(request,'character_details.html',{'character':details})
 
-
 def city_details(request, _id):
-    details=get_details(request)
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request, 'city_details.html', {'city': details})
 
-    return render(request, 'city_details.html', {'character': details})
+def droid_details(request,_id):
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request, 'droid_details.html', {'droid': details})
+
+def film_details(request,_id):
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request, 'film_details.html', {'film': details})
+
+def music_details(request,_id):
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request, 'music_details.html', {'music': details})
+
+def organization_details(request,_id):
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request, 'organization_details.html', {'organization': details})
+
+def planet_details(request,_id):
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request, 'planet_details.html', {'planet': details})
+
+def quote_details(request,_id):
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request, 'quote_details.html', {'quote': details})
+
+def specie_details(request,_id):
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request,"species_details.html",{'specie': details})
+
+def starship_details(request,_id):
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request,"starship_details.html",{'starship': details})
+
+def vehicle_details(request,_id):
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request,"vehicle_details.html",{'vehicle': details})
+
+def weapon_details(request,_id):
+    details=get_details(request.build_absolute_uri(),graph)
+    return render(request,"weapon_details.html",{'weapon':details})
+
+
+def characters(request):
+    return render(request,'characters.html',{"characters":get_list("http://localhost:8000/Character",graph)})
+
+def edit_character(request,_id):
+    character_uri=request.build_absolute_uri().split("/")
+    character_uri="/".join(character_uri[:-1])
+    initial_data=get_details(character_uri,graph,for_form=True)
+
+    form = CharacterAttributesForm(initial=initial_data)
+    return render(request,'edit_character.html',{'form':form})
+
+

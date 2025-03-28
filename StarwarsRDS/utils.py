@@ -1,5 +1,6 @@
 import json
 import re
+from collections import defaultdict
 from urllib.parse import urlparse
 
 
@@ -39,15 +40,36 @@ def is_valid_uri(search_string): #apparently this divides into the components, a
     parsed=urlparse(search_string)
     return all([parsed.scheme,parsed.netloc])
 
-def get_details(request):
-    uri = request.build_absolute_uri()
+details_query="""
+SELECT ?p ?o ?oName
+WHERE{
+    ?uri ?p ?o .
+    OPTIONAL { ?o rdfs:label ?oName . }
+}
+"""
 
+list_query="""
+SELECT ?o ?oName
+WHERE{
+    ?o rdf:type ?type ;
+       rdfs:label ?oName .
+}
+"""
+
+def get_details(uri,graph,for_form=False):
     details = defaultdict(list)
 
     for p, o, oName in graph.query(details_query, initBindings={'uri': URIRef(uri)}):
-        if oName:
-            details[p].append((o, oName))
+        p_human=to_human_readable(p)
+        if oName and not for_form:
+            details[p_human].append((str(o), str(oName)))
         else:
-            details[p].append(o)
+            details[p_human].append(str(o))
 
-    return details
+    if for_form:
+        return {key:", ".join(lst) for key,lst in details.items()}
+    else:
+        return details
+
+def get_list(type_uri,graph):
+    return graph.query(list_query,initBindings={"type": URIRef(type_uri)})

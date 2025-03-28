@@ -24,8 +24,11 @@ urlpatterns = [
     #    path('admin/', admin.site.urls),
     path('', views.home, name='home'),
 
+    path('characters/',views.characters, name='characters'),
     path('characters/<str:_id>',views.character_details,name='character_details'),
+    path('characters/<str:_id>/edit',views.edit_character,name='edit_character'),
 
 
+    path('planets/<str:_id>',views.planet_details,name='planet_details'),
     path('search',views.search, name='search'),
 ]

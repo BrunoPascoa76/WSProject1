@@ -49,45 +49,30 @@
 {% block title %}Character Details{% endblock %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Character List</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
 <div class="container mt-5">
     <div class="character-container">
-        <h2 class="character-title"><i class="fas fa-user"></i> {{ character.label.value }}</h2>
+        <h2 class="character-title"><i class="fas fa-user"></i> {{ character.label.0 }}</h2>
         <div class="card character-card">
             <div class="card-body">
-                <p><i class="fas fa-dna icon"></i><strong>Species:</strong> {{ character.species_label.value }}</p>
-                <p><i class="fas fa-globe icon"></i><strong>Homeworld:</strong> {{ character.homeworld_label.value }}</p>
-                <p><i class="fas fa-venus-mars icon"></i><strong>Gender:</strong> {{ character.gender.value }}</p>
-                <p><i class="fas fa-cut icon"></i><strong>Hair Color:</strong> {{ character.hair_color.value }}</p>
-                <p><i class="fas fa-eye icon"></i><strong>Eye Color:</strong> {{ character.eye_color.value }}</p>
-                <p><i class="fas fa-paint-brush icon"></i><strong>Skin Color:</strong> {{ character.skin_color.value }}</p>
-                <p><i class="fas fa-align-left icon"></i><strong>Description:</strong> {{ character.description.value }}</p>
-                <p><i class="fas fa-ruler-vertical icon"></i><strong>Height:</strong> {{ character.height.value }} cm</p>
-                <p><i class="fas fa-weight icon"></i><strong>Weight:</strong> {{ character.weight.value }} kg</p>
-                <p><i class="fas fa-baby icon"></i><strong>Year Born:</strong> {{ character.year_born.value }}</p>
-                <p><i class="fas fa-skull icon"></i><strong>Year Died:</strong> {{ character.year_died.value }}</p>
+                <p><i class="fas fa-dna icon"></i><strong>Species: </strong><a href="{{ character.specie.0.0 }}">{{ character.specie.0.1 }}</a></p>
+                <p><i class="fas fa-globe icon"></i><strong>Homeworld: </strong><a href="{{ character.homeworld.0.0 }}">{{ character.homeworld.0.1 }}</a></p>
+                <p><i class="fas fa-venus-mars icon"></i><strong>Gender: </strong> {{ character.gender|join:", " }}</p>
+                <p><i class="fas fa-cut icon"></i><strong>Hair Color: </strong> {{ character.hair_color|join:", " }}</p>
+                <p><i class="fas fa-eye icon"></i><strong>Eye Color: </strong> {{ character.eye_color.value|join:", " }}</p>
+                <p><i class="fas fa-paint-brush icon"></i><strong>Skin Color: </strong> {{ character.skin_color|join:", " }}</p>
+                <p><i class="fas fa-align-left icon"></i><strong>Description: </strong> {{ character.description|join:", " }}</p>
+                <p><i class="fas fa-ruler-vertical icon"></i><strong>Height: </strong> {{ character.height|join:", " }} cm</p>
+                <p><i class="fas fa-weight icon"></i><strong>Weight: </strong> {{ character.weight|join:", " }} kg</p>
+                <p><i class="fas fa-baby icon"></i><strong>Year Born: </strong> {{ character.year_born|join:", " }}</p>
+                <p><i class="fas fa-skull icon"></i><strong>Year Died: </strong> {{ character.year_died|join:", " }}</p>
             </div>
         </div>
         <div class="text-center mt-3">
-            <button class="btn btn-primary edit-attributes-btn"
+            <button class="btn btn-primary edit-btn"
                 data-toggle="modal" 
                 data-target="#editModal"
                 data-uri="{{ character.uri|urlencode }}">
                 Edit Attributes
-            </button>
-        
-            <button class="btn btn-secondary edit-relations-btn"
-                data-toggle="modal" 
-                data-target="#editModal"
-                data-uri="{{ character.uri|urlencode }}">
-                Edit Relations
             </button>
         </div>
     </div>
@@ -124,18 +109,10 @@
     $(document).ready(function () {
         var editModal = new bootstrap.Modal(document.getElementById('editModal')); // Initialize modal instance
 
-        $('.edit-attributes-btn').click(function () {
+        $('.edit-btn').click(function () {
             var characterUri = $(this).data('uri');
             var decodedUri = decodeURIComponent(characterUri);
-            $('#editModalContent').load(`/edit/attributes/${decodedUri}/`, function () {
-                editModal.show(); // Show the modal after content is loaded
-            });
-        });
-
-        $('.edit-relations-btn').click(function () {
-            var characterUri = $(this).data('uri');
-            var decodedUri = decodeURIComponent(characterUri);
-            $('#editModalContent').load(`/edit/relations/${decodedUri}/`, function () {
+            $('#editModalContent').load(`${window.location.href}/edit`, function () {
                 editModal.show(); // Show the modal after content is loaded
             });
         });
