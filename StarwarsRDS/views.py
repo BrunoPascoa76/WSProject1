@@ -167,7 +167,7 @@ def quotes(request):
     return render(request,'quotes.html',{"quotes":get_list(uri,graph)})
 
 def species(request):
-    uri="http://localhost:8000/Species"
+    uri="http://localhost:8000/Specie"
     return render(request,'species.html',{"species":get_list(uri,graph)})
 
 def starships(request):

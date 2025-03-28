@@ -27,48 +27,40 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
 
-{% block title %}Planet Details{% endblock %}
+{% block title %}{{ planet.label|first }}{% endblock %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planet Details</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
 <div class="container mt-5">
     <div class="character-container">
-        <h2 class="character-title"><i class="fa-solid fa-globe"></i> {{ attributes.label|first }}</h2> <!-- Planet Name -->
+        <h2 class="character-title"><i class="fa-solid fa-globe"></i> {{ planet.label.0 }}</h2> <!-- Planet Name -->
         <div class="card character-card">
             <div class="card-body">
-                <p><i class="fas fa-weight-hanging icon"></i><strong>Gravity:</strong> {{ attributes.gravity|first }}</p>
-                <p><i class="fas fa-cloud icon"></i><strong>Climate:</strong> {{ attributes.climate|first }}</p>
-                <p><i class="fas fa-users icon"></i><strong>Population:</strong> {{ attributes.population|first }}</p>
-                <p><i class="fas fa-ruler-combined icon"></i><strong>Diameter:</strong> {{ attributes.diameter|first }} km</p>
-                <p><i class="fas fa-redo icon"></i><strong>Rotation Period:</strong> {{ attributes.rotation_period|first }} hours</p>
-                <p><i class="fas fa-sun icon"></i><strong>Orbital Period:</strong> {{ attributes.orbital_period|first }} days</p>
-                <p><i class="fas fa-tint icon"></i><strong>Surface Water:</strong> {{ attributes.surface_water|first }}%</p>
-                <p><i class="fas fa-mountain icon"></i><strong>Terrain:</strong> {{ attributes.terrain|first }}</p>
+                <p><i class="fas fa-weight-hanging icon"></i><strong>Gravity: </strong> {{ planet.gravity|first }}</p>
+                <p><i class="fas fa-cloud icon"></i><strong>Climate: </strong> {{ planet.climate|first }}</p>
+                <p><i class="fas fa-users icon"></i><strong>Population: </strong> {{ planet.population|first }}</p>
+                <p><i class="fas fa-ruler-combined icon"></i><strong>Diameter: </strong> {{ planet.diameter|first }} km</p>
+                <p><i class="fas fa-redo icon"></i><strong>Rotation Period: </strong> {{ planet.rotation_period|first }} hours</p>
+                <p><i class="fas fa-sun icon"></i><strong>Orbital Period: </strong> {{ planet.orbital_period|first }} days</p>
+                <p><i class="fas fa-tint icon"></i><strong>Surface Water: </strong> {{ planet.surface_water|first }}%</p>
+                <p><i class="fas fa-mountain icon"></i><strong>Terrain: </strong>
+                    {% for terrain in planet.terrain %}
+                        {{ terrain }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
 
-                <p><i class="fas fa-user icon"></i><strong>Residents:</strong> 
-                    {% for resident in relations.resident %}
-                        {{ resident }}{% if not loop.last %}, {% endif %}
+                <p><i class="fas fa-user icon"></i><strong>Residents: </strong>
+                    {% for url,label in planet.resident %}
+                        <a href="{{ url }}">{{ label }}</a>{% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 </p>
 
                 <p><i class="fas fa-film icon"></i><strong>Appears In:</strong> 
-                    {% for film in relations.appears_in %}
-                        {{ film }}{% if not loop.last %}, {% endif %}
+                    {% for url,label in planet.appears_in %}
+                        <a href="{{ url }}">{{ label }}</a>{% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 </p>
             </div>
         </div>
-
-        <button class="btn btn-primary edit-btn" data-toggle="modal" data-target="#editModal" data-uri="{{ character.uri|urlencode }}">
-            Edit
-        </button>
     </div>
 </div>
 

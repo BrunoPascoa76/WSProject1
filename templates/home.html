@@ -70,8 +70,7 @@
         network.on("click", function(params) {
             if (params.nodes.length > 0) {
                 var nodeId = params.nodes[0];
-                var node = network.body.data.nodes.get(nodeId);
-                print("Node",node)
+                var node = network.body.data.nodes.get(nodeId); 
                 if (node && node.url) {
                     window.open(node.url, "_blank");
                 }

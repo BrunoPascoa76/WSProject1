@@ -27,31 +27,19 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
 
-{% block title %}Organization Details{% endblock %}
+{% block title %}{{ quote.label|first }}{% endblock %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quote Details</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
 <div class="container mt-5">
     <div class="character-container">
         <h2 class="character-title"><i class="fa-solid fa-comment icon"></i></i></h2> <!-- Display the first value of label -->
         <div class="card character-card">
             <div class="card-body">
-                <p><i class="fa-solid fa-comment icon"></i><strong>Quote:</strong> {{ attributes.label|first }}</p>
-                <p><i class="fa-solid fa-user icon"></i><strong>Said By:</strong> {{ attributes.said_by|first }}</p>
-                <p><i class="fa-solid fa-film icon"></i><strong>From Movie:</strong> {{ attributes.appears_ins|first }}</p>
+                <p><i class="fa-solid fa-comment icon"></i><strong>Quote: </strong> {{ quote.label.0 }}</p>
+                <p><i class="fa-solid fa-user icon"></i><strong>Said By: </strong><a href="{{ quote.said_by.0.0 }}">{{ quote.said_by.0.1 }}</a></p>
+                <p><i class="fa-solid fa-film icon"></i><strong>From Movie: </strong><a href="{{ quote.appears_in.0.0 }}">{{ quote.appears_in.0.1 }}</a></p>
             </div>
         </div>
-
-        <button class="btn btn-primary edit-btn" data-toggle="modal" data-target="#editModal" data-uri="{{ character.uri|urlencode }}">
-            Edit
-        </button>
     </div>
 </div>
 {% endblock %}

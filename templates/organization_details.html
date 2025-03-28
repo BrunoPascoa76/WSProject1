@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
 
-{% block title %}Organization Details{% endblock %}
+{% block title %}{{ organization.label|first }}{% endblock %}
 
 {% block content %}
 <!DOCTYPE html>
@@ -40,25 +40,30 @@
 </head>
 <div class="container mt-5">
     <div class="character-container">
-        <h2 class="character-title"><i class="fa-solid fa-network-wired"></i></i> {{ attributes.label|first }}</h2> <!-- Display the first value of label -->
+        <h2 class="character-title"><i class="fa-solid fa-network-wired"></i></i> {{ organization.label|first }}</h2> <!-- Display the first value of label -->
         <div class="card character-card">
             <div class="card-body">
-                <p><i class="fas fa-align-left icon"></i><strong>Description:</strong> {{ attributes.description|first }}</p>
-                <p><i class="fas fa-calendar-alt icon"></i><strong>Founded:</strong> {{ attributes.founded|first }}</p>
-                <p><i class="fas fa-calendar-times icon"></i><strong>Dissolved:</strong> {{ attributes.dissolved|first }}</p>
-                <p><i class="fas fa-users-cog icon"></i><strong>Affiliation:</strong> {{ attributes.affiliation|first }}</p>
-                <p><i class="fas fa-user-tie icon"></i><strong>Leader:</strong> {{ attributes.leader|first }}</p>
+                <p><i class="fas fa-align-left icon"></i><strong>Description:</strong> {{ organization.description|first }}</p>
+                <p><i class="fas fa-calendar-alt icon"></i><strong>Founded:</strong> {{ organization.founded|first }}</p>
+                <p><i class="fas fa-calendar-times icon"></i><strong>Dissolved:</strong> {{ organization.dissolved|first }}</p>
+                <p><i class="fas fa-users-cog icon"></i><strong>Affiliation:</strong> {{ organization.affiliation|first }}</p>
+                <p>
+                    <i class="fas fa-user-tie icon"></i><strong>Leader:</strong>
+                    {% for url,label in organization.leader %}
+                        <a href="{{ url }}">{{ label }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
     
                 <p><i class="fas fa-users icon"></i><strong>Members:</strong> 
-                    {% for member in relations.member %}
-                        {{ member }}{% if not loop.last %}, {% endif %}
+                    {% for url,label in organization.member %}
+                        <a href="{{ url }}">{{ label }}</a>{% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 </p>
     
                 <!-- Loop through the 'appears_in' list and display each film -->
                 <p><i class="fas fa-film icon"></i><strong>Appears In:</strong> 
-                    {% for film in relations.appears_in %}
-                        {{ film }}{% if not loop.last %}, {% endif %}
+                    {% for url,label in organization.appears_in %}
+                        <a href="{{ url }}">{{ label }}</a>{% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 </p>
             </div>
