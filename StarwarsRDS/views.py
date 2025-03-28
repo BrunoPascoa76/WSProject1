@@ -3,19 +3,21 @@ from collections import defaultdict
 from unittest import case
 from os import getenv
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
 from os import getenv
 from rdflib.plugins.sparql import prepareQuery, prepareUpdate
 from django.views.decorators.csrf import csrf_exempt
 from urllib.parse import unquote
-from .forms import CharacterAttributesForm, CharacterRelationsForm
+
+from . import queries
+from .forms import CharacterForm, CharacterRelationsForm
 import json
 from urllib.parse import unquote
 
 from rdflib import Graph, URIRef, Literal, RDFS, RDF
 from rdflib.plugins.stores.sparqlstore import SPARQLStore, SPARQLUpdateStore
-from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable, get_details, get_list
+from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable, get_details, get_list, update_character
 
 endpoint = "http://localhost:7200/"
 
@@ -36,24 +38,10 @@ def search(request):
 
     if is_valid_uri(q):
         # q is either a subject or is a type (the only relevant uri that is object only, at least for now)
-        query = """
-        SELECT DISTINCT ?s ?p ?o ?sName
-        WHERE {
-            ?s ?p ?o .
-            FILTER((?s = ?q && ?p = rdfs:label) || (?p = rdf:type && ?o = ?q))
-            ?s rdfs:label ?sName .
-        }
-        """
+        query = queries.SEARCH_SUBJECT
     else:
         # search for instances where it is an object (or part of it)
-        query ="""
-            SELECT DISTINCT ?s ?sName ?p
-            WHERE {
-                ?s ?p ?o .
-                FILTER (regex(?o,?q,"i"))
-                ?s rdfs:label ?sName .
-            }
-        """
+        query =queries.SEARCH_OBJECT
 
     results = graph.query(query,initBindings={'q':URIRef(q) if is_valid_uri(q) else Literal(q)})
 
@@ -71,15 +59,7 @@ def search(request):
         return render(request, 'search.html', {'results': results_list, 'query_string': re.split(r'[/#]', q)[-1]})
 
 def type_graph(request,_type):
-    query="""
-    CONSTRUCT {
-        ?s rdf:type ?type ;
-               ?p ?o .
-    }WHERE{
-        ?s rdf:type ?type ;
-            ?p ?o .
-    }
-    """
+    query=queries.CONSTRUCT_LOCAL_GRAPH
     uri=request.build_absolute_uri()[:-1] #to remove the last "/"
     local_graph=graph.query(query,initBindings={'type':URIRef(uri)}).graph
     return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(local_graph)})
@@ -183,12 +163,36 @@ def weapons(request):
     return render(request,'weapons.html',{"weapons":get_list(uri,graph)})
 
 
-def edit_character(request,_id):
-    character_uri=request.build_absolute_uri().split("/")
-    character_uri="/".join(character_uri[:-1])
-    initial_data=get_details(character_uri,graph,for_form=True)
+def edit_character(request,_id=None):
+    if request.method == "GET":
+        if _id: #the id itself is not important, it's just that I needed it for the path (and now use it to decide whether it's an updade or insert
+            character_uri=request.build_absolute_uri().split("/")
+            character_uri="/".join(character_uri[:-1])
+            initial_data=get_details(character_uri,graph,for_form=True)
 
-    form = CharacterAttributesForm(initial=initial_data)
-    return render(request,'edit_character.html',{'form':form})
+            form = CharacterForm(initial=initial_data)
+        else:
+            form=CharacterForm()
+        return render(request,'edit_character.html',{'form':None})
+    elif request.method == "POST":
+        form=CharacterForm(request.POST)
+
+        if form.is_valid():
+            if _id:
+                character_uri=request.build_absolute_uri().split("/")
+                character_uri="/".join(character_uri[:-1])
+                update_character(graph,form,character_uri=character_uri)
+            else:
+                update_character(graph,form)
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'errors': form.errors
+            }, status=400)
+    else:
+        return HttpResponseNotAllowed(['GET','POST'])
+
+
+
 
 

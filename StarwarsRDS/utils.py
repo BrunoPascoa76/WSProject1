@@ -4,10 +4,14 @@ from collections import defaultdict
 from urllib.parse import urlparse
 
 
-from rdflib import URIRef, Literal
+from rdflib import URIRef, Literal, Namespace, RDF, RDFS
 from rdflib.extras.external_graph_libs import rdflib_to_networkx_graph
 import networkx as nx
 from pyvis.network import Network
+from slugify import slugify
+
+from StarwarsRDS import queries
+
 
 def rdflib_graph_to_html(graph,physics_enabled=False):
     """Generates the html code for an interactible graph based on an rdflib input"""
@@ -40,26 +44,10 @@ def is_valid_uri(search_string): #apparently this divides into the components, a
     parsed=urlparse(search_string)
     return all([parsed.scheme,parsed.netloc])
 
-details_query="""
-SELECT ?p ?o ?oName
-WHERE{
-    ?uri ?p ?o .
-    OPTIONAL { ?o rdfs:label ?oName . }
-}
-"""
-
-list_query="""
-SELECT ?o ?oName
-WHERE{
-    ?o rdf:type ?type ;
-       rdfs:label ?oName .
-}
-"""
-
 def get_details(uri,graph,for_form=False):
     details = defaultdict(list)
 
-    for p, o, oName in graph.query(details_query, initBindings={'uri': URIRef(uri)}):
+    for p, o, oName in graph.query(queries.DETAILS, initBindings={'uri': URIRef(uri)}):
         p_human=to_human_readable(p)
         if oName and not for_form:
             details[p_human].append((str(o), str(oName)))
@@ -72,4 +60,39 @@ def get_details(uri,graph,for_form=False):
         return details
 
 def get_list(type_uri,graph):
-    return graph.query(list_query,initBindings={"type": URIRef(type_uri)})
+    return graph.query(queries.LIST,initBindings={"type": URIRef(type_uri)})
+
+def update_character(graph,form,character_uri=None):
+    sw = Namespace("http://localhost:8000/characters/")
+    character_ns = Namespace("http://localhost:8000/characters/")
+    specie_ns=Namespace("http://localhost:8000/characters/species/")
+    planet_ns=Namespace("http://localhost:8000/characters/planets/")
+
+    if character_uri:
+        character_uri=URIRef(character_uri)
+        #if already exists, remove all old triples first
+        graph.remove((character_uri,None,None))
+    else:
+        character_uri=URIRef(character_ns[slugify(form.cleaned_data["label"])])
+
+    #add attributes
+    for attribute in ["label", "species", "gender", "species", "gender", "height", "weight", "hair_color", "eye_color",
+                      "skin_color", "year_born", "year_died", "description"]:
+        value = form.cleaned_data.get(attribute)
+        if value:
+            graph.add((character_uri,sw[attribute],Literal(value)))
+
+    #add relations
+    specie=form.cleaned_data.get("species")
+    if specie:
+        specie_uri = URIRef(specie_ns[slugify(specie)])
+        graph.add((character_uri, sw.specie, specie_uri))
+        graph.add((specie_uri, RDF.type, sw.Specie))
+        graph.add((specie_uri, RDFS.label, Literal(specie)))
+
+    homeworld=form.cleaned_data.get("homeworld")
+    if homeworld:
+        homeworld_uri = URIRef(planet_ns[slugify(homeworld)])
+        graph.add((character_uri, sw.homeworld, homeworld_uri))
+        graph.add((homeworld_uri, RDF.type, sw.Planet))
+        graph.add((homeworld_uri, RDFS.label, Literal(homeworld)))
