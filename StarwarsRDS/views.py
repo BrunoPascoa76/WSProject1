@@ -135,7 +135,53 @@ def weapon_details(request,_id):
 
 
 def characters(request):
-    return render(request,'characters.html',{"characters":get_list("http://localhost:8000/Character",graph)})
+    uri="http://localhost:8000/Character"
+    return render(request,'characters.html',{"characters":get_list(uri,graph)})
+
+def cities(request):
+    uri="http://localhost:8000/City"
+    return render(request,'cities.html',{"cities":get_list(uri,graph)})
+
+def droids(request):
+    uri="http://localhost:8000/Droid"
+    return render(request,'droids.html',{"droids":get_list(uri,graph)})
+
+def films(request):
+    uri="http://localhost:8000/Film"
+    return render(request,'films.html',{"films":get_list(uri,graph)})
+
+def music(request):
+    uri="http://localhost:8000/Music"
+    return render(request,'music.html',{"music":get_list(uri,graph)})
+
+def organizations(request):
+    uri="http://localhost:8000/Organization"
+    return render(request,'organizations.html',{"organizations":get_list(uri,graph)})
+
+def planets(request):
+    uri="http://localhost:8000/Planet"
+    return render(request,'planets.html',{"planets":get_list(uri,graph)})
+
+def quotes(request):
+    uri="http://localhost:8000/Quote"
+    return render(request,'quotes.html',{"quotes":get_list(uri,graph)})
+
+def species(request):
+    uri="http://localhost:8000/Species"
+    return render(request,'species.html',{"species":get_list(uri,graph)})
+
+def starships(request):
+    uri="http://localhost:8000/Starship"
+    return render(request,'starships.html',{"starships":get_list(uri,graph)})
+
+def vehicles(request):
+    uri="http://localhost:8000/Vehicle"
+    return render(request,'vehicles.html',{"vehicles":get_list(uri,graph)})
+
+def weapons(request):
+    uri="http://localhost:8000/Weapon"
+    return render(request,'weapons.html',{"weapons":get_list(uri,graph)})
+
 
 def edit_character(request,_id):
     character_uri=request.build_absolute_uri().split("/")
