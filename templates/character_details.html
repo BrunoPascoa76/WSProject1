@@ -110,8 +110,6 @@
         var editModal = new bootstrap.Modal(document.getElementById('editModal')); // Initialize modal instance
 
         $('.edit-btn').click(function () {
-            var characterUri = $(this).data('uri');
-            var decodedUri = decodeURIComponent(characterUri);
             $('#editModalContent').load(`${window.location.href}/edit`, function () {
                 editModal.show(); // Show the modal after content is loaded
             });

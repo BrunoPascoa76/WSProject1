@@ -11,12 +11,13 @@ from django.views.decorators.csrf import csrf_exempt
 from urllib.parse import unquote
 
 from . import queries
-from .forms import CharacterForm, CharacterRelationsForm
 import json
 from urllib.parse import unquote
 
 from rdflib import Graph, URIRef, Literal, RDFS, RDF
 from rdflib.plugins.stores.sparqlstore import SPARQLStore, SPARQLUpdateStore
+
+from .forms import CharacterForm
 from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable, get_details, get_list, update_character
 
 endpoint = "http://localhost:7200/"
@@ -169,11 +170,10 @@ def edit_character(request,_id=None):
             character_uri=request.build_absolute_uri().split("/")
             character_uri="/".join(character_uri[:-1])
             initial_data=get_details(character_uri,graph,for_form=True)
-
             form = CharacterForm(initial=initial_data)
         else:
             form=CharacterForm()
-        return render(request,'edit_character.html',{'form':None})
+        return render(request,'edit_character.html',{'form':form})
     elif request.method == "POST":
         form=CharacterForm(request.POST)
 
@@ -181,9 +181,10 @@ def edit_character(request,_id=None):
             if _id:
                 character_uri=request.build_absolute_uri().split("/")
                 character_uri="/".join(character_uri[:-1])
-                update_character(graph,form,character_uri=character_uri)
+                update_character(form,character_uri=character_uri)
             else:
-                update_character(graph,form)
+                update_character(form)
+            return HttpResponse(200)
         else:
             return JsonResponse({
                 'status': 'error',
