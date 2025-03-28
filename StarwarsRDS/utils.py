@@ -38,3 +38,16 @@ def to_human_readable(node):
 def is_valid_uri(search_string): #apparently this divides into the components, and if it has them all, then it should be at least close enough to a valid uri to not result in an error
     parsed=urlparse(search_string)
     return all([parsed.scheme,parsed.netloc])
+
+def get_details(request):
+    uri = request.build_absolute_uri()
+
+    details = defaultdict(list)
+
+    for p, o, oName in graph.query(details_query, initBindings={'uri': URIRef(uri)}):
+        if oName:
+            details[p].append((o, oName))
+        else:
+            details[p].append(o)
+
+    return details

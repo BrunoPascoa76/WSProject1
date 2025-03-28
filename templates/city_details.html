@@ -40,12 +40,12 @@
 </head>
 <div class="container mt-5">
     <div class="character-container">
-        <h2 class="character-title"><i class="fas fa-city"></i> {{ attributes.label }}</h2>
+        <h2 class="character-title"><i class="fas fa-city"></i> {{ city.label }}</h2>
         <div class="card character-card">
             <div class="card-body">
-                <p><i class="fas fa-align-left icon"></i><strong>Description:</strong> {{ attributes.description }}</p>
-                <p><i class="fas fa-users icon"></i><strong>Population:</strong> {{ attributes.population }}</p>
-                <p><i class="fas fa-globe icon"></i><strong>Planet:</strong> {{ relations.planet }}</p>
+                <p><i class="fas fa-align-left icon"></i><strong>Description:</strong> {{ details.description }}</p>
+                <p><i class="fas fa-users icon"></i><strong>Population:</strong> {{ details.population }}</p>
+                <p><i class="fas fa-globe icon"></i><strong>Planet:</strong> {{ details.planet }}</p>
             </div>
         </div>
         <button class="btn btn-primary edit-btn"
