@@ -30,6 +30,10 @@ urlpatterns = [
     path('characters',views.characters, name='characters'),
     path('characters/<str:_id>',views.character_details,name='character_details'),
     path('characters/<str:_id>/edit',views.edit_character,name='edit_character'),
+    path('characters/add/modal',views.insert_character_modal,name='insert_character_modal'),
+    path('characters/add/character',views.insert_character,name='insert_character'),
+    
+
 
     path('cities',views.cities,name='cities'),
     path('cities/<str:_id>',views.city_details,name='city_details'),

@@ -1,0 +1,91 @@
+<form id="insertAttributesForm" method="post" action="{% url 'insert_character' %}" class="form-container">
+    {% csrf_token %}
+    <div class="form-group">
+        {{ form.as_p }}
+    </div>
+    <button type="submit" class="btn-submit">Save</button>
+</form>
+
+<script>
+    $("#insertAttributesForm").submit(function(event) {
+        event.preventDefault();  // Prevent default form submission
+
+        var form = $(this);
+        
+        // Send the form data via AJAX
+        $.ajax({
+            url: form.attr("action"),  // Use form's action or fallback to request.path
+            type: "POST",
+            data: form.serialize(),
+            success: function(response) {
+                alert(response.status);
+                location.reload();  // Reload the page after successful submission
+            },
+            error: function() {
+                alert("Error updating character attributes.");
+            }
+        });
+    });
+</script>
+
+
+<!-- CSS for Styling -->
+<style>
+    .form-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group p {
+        margin: 15px 0;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: #f9f9f9;
+        color: #333;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #4CAF50;
+        outline: none;
+    }
+
+    .btn-submit {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: background-color 0.3s;
+    }
+
+    .btn-submit:hover {
+        background-color: #45a049;
+    }
+
+    .btn-submit:active {
+        background-color: #388e3c;
+    }
+</style>

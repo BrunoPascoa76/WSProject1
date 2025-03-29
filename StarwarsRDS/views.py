@@ -3,19 +3,19 @@ from collections import defaultdict
 from unittest import case
 from os import getenv
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
 from os import getenv
 from rdflib.plugins.sparql import prepareQuery, prepareUpdate
 from django.views.decorators.csrf import csrf_exempt
 from urllib.parse import unquote
-from .forms import CharacterAttributesForm, CharacterRelationsForm
+from .forms import CharacterAttributesForm, CharacterRelationsForm, CharacterInsertForm
 import json
 from urllib.parse import unquote
 
 from rdflib import Graph, URIRef, Literal, RDFS, RDF
 from rdflib.plugins.stores.sparqlstore import SPARQLStore, SPARQLUpdateStore
-from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable, get_details, get_list
+from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable, get_details, get_list, insert_newcharacter
 
 endpoint = "http://localhost:7200/"
 
@@ -191,4 +191,26 @@ def edit_character(request,_id):
     form = CharacterAttributesForm(initial=initial_data)
     return render(request,'edit_character.html',{'form':form})
 
+def insert_character_modal(request, id=None):  
+    form = CharacterInsertForm()  # Initialize empty form for GET request
+    print("Rendering form")
 
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  # AJAX check
+        return render(request, 'insert_character.html', {'form': form})
+    else:
+        return render(request, 'insert_character.html', {'form': form})  # For regular GET requests
+
+def insert_character(request):
+    print("Inserting character")
+    if request.method == "POST":
+        form = CharacterInsertForm(request.POST)  # Initialize form with POST data
+        
+        if form.is_valid():
+            insert_newcharacter(form)
+            
+
+            return JsonResponse({"status": "success"}, status=200)
+        else:
+            return JsonResponse({"status": "error", "errors": form.errors}, status=400)
+
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
