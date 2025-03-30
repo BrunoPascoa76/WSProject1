@@ -4,8 +4,15 @@
 {% block title %}Home - Starwars Dataverse{% endblock %}
 
 {% block styles %}
+    <link href="https://www.fontlibrary.org/face/star-jedi" rel="stylesheet">
     <style>
         /* Star Wars background */
+
+        @font-face {
+            font-family: 'StarJedi';
+            src: url("{% static '/fonts/Starjedi.ttf' %}") format('truetype');
+        }
+
         body {
             background: url('https://t4.ftcdn.net/jpg/02/22/57/71/360_F_222577179_MTxLtAKP3nwY5LEyKva28oCt0xO4qxJ2.jpg');
             color: yellow;
@@ -20,9 +27,8 @@
         /* Star Wars text animation */
         h1.display-4 {
             font-size: 3rem;
-            text-transform: uppercase;
-            animation: starWarsText 5s linear infinite;
-            color:yellow    ;
+            animation: starWarsText 500ms linear forwards;
+            color: #FFE81F;
         }
 
         /* Star Wars crawl effect */
@@ -37,24 +43,43 @@
             width: 100%;
             text-align: center;
             animation: scrollText 10s linear infinite;
-            color: yellow;
+            color: #FFE81F;
         }
 
         /* Graph container */
         #graph-container {
             margin-top: 20px;
             background: rgba(0, 0, 0, 0.9);
-            border: 2px solid yellow;
+            border: 2px solid #FFE81F;
             padding: 20px;
             border-radius: 10px;
+        }
+
+        .star-wars-font {
+            font-family: 'StarJedi', sans-serif;
+        }
+
+        @keyframes starWarsText {
+            0% {
+                transform: scale(0.8); /* Normal size */
+                opacity: 0.25; /* Fully visible */
+            }
+            50% {
+                transform: scale(0.9); /* Slightly larger */
+                opacity: 0.5; /* Semi-transparent */
+            }
+            100% {
+                transform: scale(1); /* Back to normal size */
+                opacity: 1; /* Fully visible */
+            }
         }
     </style>
 {% endblock %}
 
 {% block content %}
     <div class="jumbotron text-center">
-        <h1 class="display-4">Welcome to the Star Wars Dataverse</h1>
-        <div class="crawl">
+        <h1 class="display-4 star-wars-font">Welcome to the Star Wars Dataverse</h1>
+        <div class="crawl star-wars-font">
             <p>May the Force be with you...</p>
         </div>
         <hr class="my-2">
@@ -68,7 +93,7 @@
 {% block scripts %}
     <script>
         // Custom JavaScript for interactive graph nodes
-        network.on("click", function(params) {
+        network.on("click", function (params) {
             if (params.nodes.length > 0) {
                 var nodeId = params.nodes[0];
                 var node = network.body.data.nodes.get(nodeId);
