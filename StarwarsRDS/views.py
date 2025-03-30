@@ -3,7 +3,7 @@ from collections import defaultdict
 from unittest import case
 from os import getenv
 
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from os import getenv
 from rdflib.plugins.sparql import prepareQuery, prepareUpdate
@@ -59,12 +59,6 @@ def search(request):
             })
         return render(request, 'search.html', {'results': results_list, 'query_string': re.split(r'[/#]', q)[-1]})
 
-def type_graph(request,_type):
-    query=queries.CONSTRUCT_LOCAL_GRAPH
-    uri=request.build_absolute_uri()[:-1] #to remove the last "/"
-    local_graph=graph.query(query,initBindings={'type':URIRef(uri)}).graph
-    return render(request, 'home.html', {'graph_html': rdflib_graph_to_html(local_graph)})
-
 
 def character_details(request,_id):
     details=get_details(request.build_absolute_uri(),graph)
@@ -117,51 +111,75 @@ def weapon_details(request,_id):
 
 def characters(request):
     uri="http://localhost:8000/Character"
-    return render(request,'characters.html',{"characters":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'characters.html',{"characters":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def cities(request):
     uri="http://localhost:8000/City"
-    return render(request,'cities.html',{"cities":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'cities.html',{"cities":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def droids(request):
     uri="http://localhost:8000/Droid"
-    return render(request,'droids.html',{"droids":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'droids.html',{"droids":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def films(request):
     uri="http://localhost:8000/Film"
-    return render(request,'films.html',{"films":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'films.html',{"films":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def music(request):
     uri="http://localhost:8000/Music"
-    return render(request,'music.html',{"music":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'music.html',{"music":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def organizations(request):
     uri="http://localhost:8000/Organization"
-    return render(request,'organizations.html',{"organizations":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'organizations.html',{"organizations":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def planets(request):
     uri="http://localhost:8000/Planet"
-    return render(request,'planets.html',{"planets":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'planets.html',{"planets":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def quotes(request):
     uri="http://localhost:8000/Quote"
-    return render(request,'quotes.html',{"quotes":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'quotes.html',{"quotes":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def species(request):
     uri="http://localhost:8000/Specie"
-    return render(request,'species.html',{"species":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'species.html',{"species":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def starships(request):
     uri="http://localhost:8000/Starship"
-    return render(request,'starships.html',{"starships":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'starships.html',{"starships":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def vehicles(request):
     uri="http://localhost:8000/Vehicle"
-    return render(request,'vehicles.html',{"vehicles":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'vehicles.html',{"vehicles":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 def weapons(request):
     uri="http://localhost:8000/Weapon"
-    return render(request,'weapons.html',{"weapons":get_list(uri,graph)})
+    query = queries.CONSTRUCT_LOCAL_GRAPH
+    local_graph = graph.query(query, initBindings={'type': URIRef(uri)}).graph
+    return render(request,'weapons.html',{"weapons":get_list(uri,graph),"graph_html": rdflib_graph_to_html(local_graph)})
 
 
 def edit_character(request,_id=None):
