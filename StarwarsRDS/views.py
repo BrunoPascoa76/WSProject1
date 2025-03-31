@@ -12,16 +12,24 @@ from urllib.parse import unquote
 
 from . import queries
 import json
+from s4api.graphdb_api import GraphDBApi
+from s4api.swagger import ApiClient
 from urllib.parse import unquote
 
 from rdflib import Graph, URIRef, Literal, RDFS, RDF
 from rdflib.plugins.stores.sparqlstore import SPARQLStore, SPARQLUpdateStore
+import os
 
 from .forms import CharacterForm
 from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable, get_details, get_list, update_character, \
     remove_entity
 
-endpoint = "http://localhost:7200/"
+endpoint = "http://graphdb:7200/"
+repo_name = "starwars"
+
+client = ApiClient(endpoint=endpoint)
+
+accessor = GraphDBApi(client)
 
 store = SPARQLUpdateStore(getenv("GRAPHDB_URL"), getenv("GRAPHDB_UPDATE_URL"), context_aware=False)
 graph = Graph(store)
@@ -212,15 +220,34 @@ def edit_character(request,_id=None):
     else:
         return HttpResponseNotAllowed(['GET','POST'])
 
-@csrf_exempt #we didn't have time to figure this out
-def delete_entity(request,_id):
-    uri=request.build_absolute_uri().split("/")[:-1]
-    uri="/".join(uri)
 
-    remove_entity(graph,uri)
+@csrf_exempt
+def delete_entity(request, uri):
+    print(request)
+    if request.method == "POST":
+        uri = unquote(unquote(uri))  # Decode the URI
+        print(f"Deleting character: {uri}")
 
-    return HttpResponse(200)
+        print("URI",uri)
+        delete_query = f"""
+        PREFIX sw: <http://localhost:8000/characters/>
+        DELETE WHERE {{
+            sw:{uri} ?p ?o .
+        }}
+        """
 
+
+        payload_query = {"update": delete_query}
+        
+        try:
+            response = accessor.sparql_update(body=payload_query, repo_name=repo_name)
+            print("Delete response:", response)
+            return JsonResponse({"success": True, "message": "Character deleted successfully."})
+        except Exception as e:
+            print("Error deleting character:", e)
+            return JsonResponse({"success": False, "message": "Error deleting character."}, status=500)
+
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=400)
 
 
 
