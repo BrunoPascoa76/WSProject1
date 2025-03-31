@@ -10,7 +10,6 @@
     $("#editAttributesForm").submit(function(event) {
         event.preventDefault();
         $.post("{{ request.path }}", $(this).serialize(), function(response) {
-            alert(response.message);
             location.reload();
         }).fail(function() {
             alert("Error updating character attributes.");

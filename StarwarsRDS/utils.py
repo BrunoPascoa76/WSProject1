@@ -72,6 +72,22 @@ def get_details(uri, graph, for_form=False):
 def get_list(type_uri, graph):
     return graph.query(queries.LIST, initBindings={"type": URIRef(type_uri)})
 
+def remove_entity(graph,uri):
+    is_uri_mentioned=graph.query(queries.IS_URI_REFERENCED,initBindings={'uri': URIRef(uri)})
+
+    if bool(is_uri_mentioned):
+        delete_query=queries.DELETE_DATA_REFERENCE_SAFE.replace("?uri",f"<{uri}>")
+    else:
+        delete_query=queries.DELETE_ALL_DATA.replace("?uri",f"<{uri}>")
+
+    response = requests.post(
+        "http://graphdb:7200/repositories/starwars/statements",
+        headers={"Content-Type": "application/sparql-update"},
+        data=delete_query,
+    )
+
+    response.raise_for_status()
+
 
 def update_character(form, character_uri=None):
     sw = Namespace("http://localhost:8000/characters/")
@@ -81,33 +97,20 @@ def update_character(form, character_uri=None):
 
     if character_uri:
         # if already exists, remove all old triples first
-        delete_query=f"""
-            DELETE {{
-                <{character_uri}> ?p ?o .
-            }} WHERE {{
-                <{character_uri}> ?p ?o .
-            }}
-        """
+        delete_query=queries.DELETE_ALL_DATA.replace("?uri",f"<{character_uri}>")
         response=requests.post(
             "http://graphdb:7200/repositories/starwars/statements",
             headers={"Content-Type": "application/sparql-update"},
             data=delete_query,
         )
+
         response.raise_for_status()
     else:
         character_uri = URIRef(character_ns[slugify(form.cleaned_data["label"])])
 
     label=form.cleaned_data["label"]
     if label:
-        insert_query=f"""
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-            PREFIX sw: <http://localhost:8000/>
-            INSERT DATA {{
-                <{character_uri}> rdfs:label "{label}"
-                <{character_uri}> rdf:type sw.Character
-            }}
-        """
+        insert_query=queries.INSERT_CHARACTER_LABEL_AND_TYPE.replace("?uri",f"<{character_uri}>").replace("?label",f'"{label}"')
         response=requests.post(
             "http://graphdb:7200/repositories/starwars/statements",
             headers={"Content-Type": "application/sparql-update"},
@@ -121,14 +124,7 @@ def update_character(form, character_uri=None):
                       "skin_color", "year_born", "year_died", "description"]:
         value = form.cleaned_data.get(attribute)
         if value:
-            insert_query = f"""
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                PREFIX sw: <http://localhost:8000/>
-                INSERT DATA {{
-                    <{character_uri}> sw:{attribute} "{value}" .
-                }}
-            """
+            insert_query = queries.INSERT_CHARACTER_ATTRIBUTES.replace("?uri",f"<{character_uri}>").replace("?attribute",f"sw:{attribute}").replace("?value",f'"{value}"')
             response = requests.post(
                 "http://graphdb:7200/repositories/starwars/statements",
                 headers={"Content-Type": "application/sparql-update"},
@@ -140,16 +136,7 @@ def update_character(form, character_uri=None):
     specie = form.cleaned_data.get("species")
     if specie:
         specie_uri=URIRef(specie_ns[slugify(specie)])
-        insert_query=f"""
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-            PREFIX sw: <http://localhost:8000/>
-            INSERT DATA {{
-                <{str(character_uri)}> sw:specie <{str(specie_uri)}> .
-                <{str(specie_uri)}> rdf:type <{str(sw.Specie)}> ;
-                    rdfs:label "{specie}" .
-            }}
-        """
+        insert_query=queries.INSERT_CHARACTER_SPECIE.replace("?character_uri",f"<{character_uri}>").replace("?specie_uri",f"<{specie_uri}>").replace("?specie",f'"{specie}"')
         response = requests.post(
             "http://graphdb:7200/repositories/starwars/statements",
             headers={"Content-Type": "application/sparql-update"},
@@ -161,16 +148,7 @@ def update_character(form, character_uri=None):
     if homeworld:
         homeworld_uri = URIRef(planet_ns[slugify(homeworld)])
 
-        insert_query = f"""
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        PREFIX sw: <http://localhost:8000/>
-        INSERT DATA {{
-                <{str(character_uri)}> sw:homeworld <{str(homeworld_uri)}> .
-                <{str(homeworld_uri)}> rdf:type <{str(sw.Homeworld)}> ;
-                    rdfs:label "{homeworld}" .
-        }}
-        """
+        insert_query = queries.INSERT_CHARACTER_HOMEWORLD.replace("?character_uri",f"<{character_uri}>").replace("?homeworld_uri",f"<{homeworld_uri}>").replace("?homeworld",f'"{homeworld}"')
         response = requests.post(
             "http://graphdb:7200/repositories/starwars/statements",
             headers={"Content-Type": "application/sparql-update"},

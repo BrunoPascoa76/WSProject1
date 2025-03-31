@@ -18,7 +18,8 @@ from rdflib import Graph, URIRef, Literal, RDFS, RDF
 from rdflib.plugins.stores.sparqlstore import SPARQLStore, SPARQLUpdateStore
 
 from .forms import CharacterForm
-from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable, get_details, get_list, update_character
+from .utils import rdflib_graph_to_html, is_valid_uri, to_human_readable, get_details, get_list, update_character, \
+    remove_entity
 
 endpoint = "http://localhost:7200/"
 
@@ -211,6 +212,14 @@ def edit_character(request,_id=None):
     else:
         return HttpResponseNotAllowed(['GET','POST'])
 
+@csrf_exempt #we didn't have time to figure this out
+def delete_entity(request,_id):
+    uri=request.build_absolute_uri().split("/")[:-1]
+    uri="/".join(uri)
+
+    remove_entity(graph,uri)
+
+    return HttpResponse(200)
 
 
 
