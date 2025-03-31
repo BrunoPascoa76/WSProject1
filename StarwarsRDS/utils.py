@@ -96,8 +96,28 @@ def update_character(form, character_uri=None):
         response.raise_for_status()
     else:
         character_uri = URIRef(character_ns[slugify(form.cleaned_data["label"])])
+
+    label=form.cleaned_data["label"]
+    if label:
+        insert_query=f"""
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX sw: <http://localhost:8000/>
+            INSERT DATA {{
+                <{character_uri}> rdfs:label "{label}"
+                <{character_uri}> rdf:type sw.Character
+            }}
+        """
+        response=requests.post(
+            "http://graphdb:7200/repositories/starwars/statements",
+            headers={"Content-Type": "application/sparql-update"},
+            data=insert_query,
+        )
+        response.raise_for_status()
+
+
     # add attributes
-    for attribute in ["label", "species", "gender", "species", "gender", "height", "weight", "hair_color", "eye_color",
+    for attribute in ["species", "gender", "species", "gender", "height", "weight", "hair_color", "eye_color",
                       "skin_color", "year_born", "year_died", "description"]:
         value = form.cleaned_data.get(attribute)
         if value:
